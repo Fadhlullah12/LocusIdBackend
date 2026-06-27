@@ -43,11 +43,8 @@ namespace LocusIDBackend.Services.Implementations
                     Message = "Department not found"
                 };
             }
-             int [] ints = new int[6];
-            ints = [1,2,3];
-            int [] ints2 = [1,2,3];
-            ints.Concat(ints2);
-            if(department != null)
+            
+            if(existingUser != null)
             {
                 return new BaseResponse<StudentDto>
                 {

@@ -28,7 +28,7 @@ namespace LocusIDBackend.Services.Implementations
             try
             {
               var user = await _userRepository.Get(a => a.Email == request.Email);
-                if (user != null)
+                if (user == null)
                     {
                       return new BaseResponse<LoginResponseDto>
                         {
