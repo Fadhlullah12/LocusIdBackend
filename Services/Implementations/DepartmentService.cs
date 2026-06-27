@@ -24,7 +24,7 @@ namespace LocusIDBackend.Services.Implementations
 
         public async Task<BaseResponse<DepartmentDto>> CreateDepartment(CreateDepartmentRequestModel request, string token)
         {
-            var userId = "7feca7a2-4b12-4314-b03c-c13fb8e3c58c";
+            var userId = "6eebd807-8efc-47be-a744-adc9c23038ae";
             var director = await _directorRepository.Get(a => a.UserId == userId);
             var faculty = await _facultyRepository.Get(a => a.Id == request.FacultyId);
             var existingDepartment = await _departmentRepository.Get(a => a.Name == request.Name && a.Faculty.SchoolId == director.School.Id);

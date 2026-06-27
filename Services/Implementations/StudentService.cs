@@ -14,16 +14,18 @@ namespace LocusIDBackend.Services.Implementations
         private readonly IUserRepository _userRepository;
         private readonly IDecodeTokenService _dectoken;
         private readonly ICourseRepository _courseRepository;
+        private readonly IFacultyRepository _facultyRepository;
         private readonly IStudentCourseRepository _studentCourseRepository;
         private readonly ISchoolRepository _schoolRepository;
         private readonly IDepartmentRepository _departmentRepository;
         public StudentService(IStudentRepository studentRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService,
-         ICourseRepository courseRepository, IStudentCourseRepository studentCourseRepository, ISchoolRepository schoolRepository, IDepartmentRepository departmentRepository)
+         ICourseRepository courseRepository, IFacultyRepository facultyRepository, IStudentCourseRepository studentCourseRepository, ISchoolRepository schoolRepository, IDepartmentRepository departmentRepository)
         {
             _studentRepository = studentRepository;
             _userRepository = userRepository;
             _dectoken = decodeTokenService;
             _courseRepository = courseRepository;
+            _facultyRepository = facultyRepository;
             _studentCourseRepository = studentCourseRepository;
             _schoolRepository = schoolRepository;
             _departmentRepository = departmentRepository;
@@ -35,12 +37,21 @@ namespace LocusIDBackend.Services.Implementations
             var existingUser = await _userRepository.Get(s => s.Email == request.Email);
             var school = await _schoolRepository.Get(s => s.Name == request.SchoolName);
             var department = await _departmentRepository.Get(d => d.Name == request.Department);
+            var faculty = await _facultyRepository.Get(f => f.Name == request.Faculty);
              if(department == null)
             {
                 return new BaseResponse<StudentDto>
                 {
                     Success = false,
                     Message = "Department not found"
+                };
+            }
+             if (faculty == null)
+            {
+                return new BaseResponse<StudentDto>
+                {
+                    Success = false,
+                    Message = "Faculty not found"
                 };
             }
             
@@ -74,7 +85,8 @@ namespace LocusIDBackend.Services.Implementations
                 MatricNumber = request.MatricNumber,
                 Department = department,
                 DepartmentId = department.Id,
-                Faculty = request.Faculty,
+                Faculty = faculty,
+                FacultyId = faculty.Id,
                 School = school,
                 SchoolId = school.Id,
             };
@@ -88,6 +100,7 @@ namespace LocusIDBackend.Services.Implementations
                 Student = student,
                 Email = request.Email,
             };
+            faculty.Students.Add(student);
             school.Students.Add(student);
             student.User = user;
             student.UserId = user.Id;
@@ -104,7 +117,7 @@ namespace LocusIDBackend.Services.Implementations
                     FullName = $"{user.FirstName} {user.LastName}",
                     MatricNumber = student.MatricNumber,
                     Department = department.Name,
-                    Faculty = student.Faculty
+                    Faculty = student.Faculty.Name,
                 }
             };
 

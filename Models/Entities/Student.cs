@@ -3,7 +3,8 @@ namespace LocusIDBackend.Models.Entities
     public class Student : BaseEntity
     {
         public string MatricNumber { get; set; } = default!;
-        public string Faculty { get; set; } = default!;
+        public Faculty Faculty { get; set; } = default!;
+        public string FacultyId { get; set; } = default!;
         public string UserId { get; set; } = default!; 
         public User User { get; set; } = default!;
         public string DepartmentId { get; set; } = default!;

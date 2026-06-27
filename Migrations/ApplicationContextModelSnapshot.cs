@@ -237,6 +237,10 @@ namespace LocusIDBackend.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("FacultyId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -255,6 +259,8 @@ namespace LocusIDBackend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("FacultyId");
 
                     b.HasIndex("SchoolId");
 
@@ -380,9 +386,9 @@ namespace LocusIDBackend.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Faculty")
+                    b.Property<string>("FacultyId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -402,6 +408,8 @@ namespace LocusIDBackend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("FacultyId");
 
                     b.HasIndex("SchoolId");
 
@@ -610,6 +618,12 @@ namespace LocusIDBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LocusIDBackend.Models.Entities.Faculty", "Faculty")
+                        .WithMany("Lecturers")
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LocusIDBackend.Models.Entities.School", "School")
                         .WithMany("Lecturers")
                         .HasForeignKey("SchoolId")
@@ -623,6 +637,8 @@ namespace LocusIDBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
+
+                    b.Navigation("Faculty");
 
                     b.Navigation("School");
 
@@ -694,6 +710,12 @@ namespace LocusIDBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LocusIDBackend.Models.Entities.Faculty", "Faculty")
+                        .WithMany("Students")
+                        .HasForeignKey("FacultyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LocusIDBackend.Models.Entities.School", "School")
                         .WithMany("Students")
                         .HasForeignKey("SchoolId")
@@ -707,6 +729,8 @@ namespace LocusIDBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
+
+                    b.Navigation("Faculty");
 
                     b.Navigation("School");
 
@@ -783,6 +807,10 @@ namespace LocusIDBackend.Migrations
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Faculty", b =>
                 {
                     b.Navigation("Departments");
+
+                    b.Navigation("Lecturers");
+
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Lecturer", b =>

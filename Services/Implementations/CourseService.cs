@@ -158,7 +158,7 @@ namespace LocusIDBackend.Services.Implementations
                     FullName = $"{s.Student.User.FirstName} {s.Student.User.LastName}",
                     MatricNumber = s.Student.MatricNumber,
                     Department = s.Student.Department.Name,
-                    Faculty = s.Student.Faculty,
+                    Faculty = s.Student.Faculty.Name,
                     AttendancePercentage = attendanceResult
                 });
             }

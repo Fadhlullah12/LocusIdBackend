@@ -12,13 +12,18 @@ namespace LocusIDBackend.Repositories.Implementations
         public async Task<School> Get(string id)
         {
            var school = await _context.Schools
+           .Include(s => s.Faculties)
+           .ThenInclude(f => f.Departments)
            .FirstOrDefaultAsync(a => a.Id == id);
+           
            return school!;
         }
 
         public async Task<School> Get(Expression<Func<School, bool>> expression)
         {
             var school = await _context.Schools
+            .Include(s => s.Faculties)
+            .ThenInclude(f => f.Departments)
            .FirstOrDefaultAsync(expression);
            return school!;
         }

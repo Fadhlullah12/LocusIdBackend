@@ -13,12 +13,14 @@ namespace LocusIDBackend.Services.Implementations
         private readonly IUserRepository _userRepository;
         private readonly IDecodeTokenService _decodeTokenService;
         private readonly ISchoolRepository _schoolRepository;
-        public LecturerService(ILecturerRepository lecturerRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService, ISchoolRepository schoolRepository)
+        private readonly IFacultyRepository _facultyRepository;
+        public LecturerService(ILecturerRepository lecturerRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService, ISchoolRepository schoolRepository, IFacultyRepository facultyRepository)
         {
             _lecturerRepository = lecturerRepository;
             _userRepository = userRepository;
             _decodeTokenService = decodeTokenService;
             _schoolRepository = schoolRepository;
+            _facultyRepository = facultyRepository;
         }
 
         public async Task<BaseResponse<CreateLecturerResponseDto>> CreateLecturer(CreateLecturerRequestModel request)
@@ -27,6 +29,7 @@ namespace LocusIDBackend.Services.Implementations
             var existingUser = await _userRepository.Get(s => s.Email == request.Email);
             var school = await _schoolRepository.Get(s => s.Name == request.SchoolName);
             var department = school.Faculties.SelectMany(f => f.Departments).FirstOrDefault(d => d.Name == request.Department);
+            var faculty = await _facultyRepository.Get(f => f.Name == request.Faculty);
              if (school == null)
             {
                 return new BaseResponse<CreateLecturerResponseDto>
@@ -35,12 +38,20 @@ namespace LocusIDBackend.Services.Implementations
                     Message = "School not found"
                 };
             }
-                if (department == null)
+            if (faculty == null)
+            {
+                return new BaseResponse<CreateLecturerResponseDto>
                 {
-                    return new BaseResponse<CreateLecturerResponseDto>
-                    {
-                        Success = false,
-                        Message = "Department not found"
+                    Success = false,
+                    Message = "Faculty not found"
+                };
+            }
+            if (department == null)
+            {
+                return new BaseResponse<CreateLecturerResponseDto>
+                {
+                    Success = false,
+                    Message = "Department not found"
                     };
                 }
             if (existinglecturer != null)
@@ -76,7 +87,10 @@ namespace LocusIDBackend.Services.Implementations
                 SchoolId = school.Id,
                 DepartmentId = department.Id,
                 Department = department,
+                FacultyId = faculty.Id,
+                Faculty = faculty
             };
+            faculty.Lecturers.Add(lecturer);
             user.Lecturer = lecturer;
             await _lecturerRepository.Create(lecturer);
             await _userRepository.Create(user);

@@ -21,7 +21,7 @@ namespace LocusIDBackend.Services.Implementations
 
         public async Task<BaseResponse<FacultyDto>> CreateFaculty(CreateFacultyRequestModel request, string token)
         {
-            var userID ="7feca7a2-4b12-4314-b03c-c13fb8e3c58c";
+            var userID ="6eebd807-8efc-47be-a744-adc9c23038ae";
             var director = await  _directorRepository.Get(u => u.UserId == userID);
             var school = director.School;
             var existingFaculty = await _facultyRepository.Get(c => c.Name == request.Name && c.SchoolId == director.School.Id);
@@ -37,7 +37,7 @@ namespace LocusIDBackend.Services.Implementations
              {
                  Name = request.Name,
                  School = director.School,
-                 SchoolId = director.School.Id,
+                 SchoolId = director.School.Id
              };
              school.Faculties.Add(faculty);
              await _facultyRepository.Create(faculty);
