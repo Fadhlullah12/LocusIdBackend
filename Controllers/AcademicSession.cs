@@ -17,7 +17,15 @@ namespace LocusIDBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAcademicSession(CreateAcademicSessionRequestModel request)
         {
-            var response = await _academicSessionService.CreateAcademicSession(request);
+            string authHeader = Request.Headers["Authorization"];
+
+            // if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            // {
+            //     return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            // }
+            // string rawToken = authHeader.Substring("Bearer ".Length).Trim();
+             string rawToken = "0";
+            var response = await _academicSessionService.CreateAcademicSession(request,rawToken);
             if (!response.Success)
             {
                 return BadRequest(response);

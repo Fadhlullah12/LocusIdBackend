@@ -45,7 +45,7 @@ namespace LocusIDBackend.Services.Implementations
             }
 
             string userId = _decodeTokenService.GetIdFromRawToken(token);
-            if (string.IsNullOrEmpty(userId))
+            if (userId == null)
             {
                 return new BaseResponse<SessionDto> { Success = false, Message = "Invalid token" };
             }
@@ -62,7 +62,7 @@ namespace LocusIDBackend.Services.Implementations
                 return new BaseResponse<SessionDto> { Success = false, Message = "An active session already exists for this course" };
             }
 
-            var session = new Session
+           var session = new Session
             {
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
@@ -72,7 +72,8 @@ namespace LocusIDBackend.Services.Implementations
                 AcademicSessionId = academicSession.Id,
                 IsActive = true, // Ensure it starts as active
                 CreatedAt = DateTime.Now, 
-            };
+            };            
+            lecturer.Sessions.Add(session);
             await _sessionRepository.Create(session);
             await _sessionRepository.Save();
             return new BaseResponse<SessionDto>

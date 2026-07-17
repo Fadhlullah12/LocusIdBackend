@@ -20,9 +20,16 @@ namespace LocusIDBackend.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("enroll")]
-        public async Task<IActionResult> Enroll([FromBody] EnrollCourseRequestModel model)
+        public async Task<IActionResult> Enroll([FromBody] ICollection<EnrollCourseRequestModel> model)
         {
-            var result = await _studentService.EnrollCourse(model);
+             string authHeader = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            }
+            string rawToken = authHeader.Substring("Bearer ".Length).Trim();
+            var result = await _studentService.EnrollCourse(model, rawToken);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpGet("courses")]

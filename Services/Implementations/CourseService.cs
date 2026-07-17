@@ -100,38 +100,45 @@ namespace LocusIDBackend.Services.Implementations
                 Data = sessions
             };
         }
-         public async Task<BaseResponse<ICollection<CourseAttendanceDto>>> CourseAttendance(string courseCode,string token)
+         public async Task<BaseResponse<OverallCourseAttendance>> CourseAttendance(string courseCode,string token)
         {
             var userID = _decodeTokenService.GetIdFromRawToken(token);
             var student = await _studentRepository.Get(u => u.UserId == userID);
             var course = await _courseRepository.Get(c => c.CourseCode == courseCode);
             if(course == null)
             {
-                return new BaseResponse<ICollection<CourseAttendanceDto>>
+                return new BaseResponse<OverallCourseAttendance>
                 {
                     Success = false,
                     Message = "Course not found"
                 };
             }
+             var attendancePercentage = await CheckAttendanceEligibility(student.Id, course.Id);
             var sessions = course.Sessions.Select(s => s.Attendances);
-            var attendances = sessions.SelectMany(a => a).Where(a => a.StudentId == student.Id).Select(a => new CourseAttendanceDto
+            var courseAttendanceDtos = new OverallCourseAttendance
             {
-                DateCreated = a.Session.CreatedAt.ToString("yyyy-MM-dd"),
-                Status = true,
-                TimeMarked = a.CreatedAt.ToString("HH:mm:ss")
-            }).ToList();
-            return new BaseResponse<ICollection<CourseAttendanceDto>>
+                AttendancePercentage = attendancePercentage,
+                Attendances = sessions.SelectMany(a => a).Where(a => a.StudentId == student.Id).Select(a => new CourseAttendanceDto
+                {
+                    DateCreated = a.Session.CreatedAt.ToString("yyyy-MM-dd"),
+                    Status = a.Attended,
+                    TimeMarked = a.CreatedAt.ToString("HH:mm:ss"),
+                }).ToList(),
+            };
+                int attendanceCount = course.Sessions.Count - courseAttendanceDtos.Attendances.Count;
+                courseAttendanceDtos.AttendedClasses = attendanceCount;
+           
+            return new BaseResponse<OverallCourseAttendance>
             {
                 Success = true,
-                Message = "Sessions retrieved successfully",
-                Data = attendances
+                Message = "Attendance retrieved successfully",
+                Data = courseAttendanceDtos
             };
-
         }
 
-        public async Task<BaseResponse<ICollection<StudentDto>>> GetCourseStudents(string courseName)
+        public async Task<BaseResponse<ICollection<StudentDto>>> GetCourseStudents(string courseCode)
         {
-            var course = await _courseRepository.Get(c => c.CourseCode == courseName);
+            var course = await _courseRepository.Get(c => c.CourseCode == courseCode);
             if (course == null)
             {
                 return new BaseResponse<ICollection<StudentDto>>

@@ -13,6 +13,7 @@ namespace LocusIDBackend.Repositories.Implementations
         public async Task<Director> Get(string id)
         {
             var director = await _context.Directors.
+            Include(d => d.School).
             FirstOrDefaultAsync(d => d.Id == id);
             return director!;
         }

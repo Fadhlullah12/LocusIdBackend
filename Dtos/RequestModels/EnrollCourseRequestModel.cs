@@ -2,7 +2,7 @@ namespace LocusIDBackend.Dtos.RequestModels
 {
     public class EnrollCourseRequestModel
     {
-        public ICollection<string> CourseIds { get; set; } = new HashSet<string>();
-        public string Token { get; set; } = default!;
+        public string CourseName { get; set; } = default!;
+        public string CourseCode { get; set; } = default!; 
     }
 }

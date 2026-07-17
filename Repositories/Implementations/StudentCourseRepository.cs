@@ -13,11 +13,15 @@ namespace LocusIDBackend.Repositories.Implementations
         public async Task<ICollection<StudentCourse>> GetAll(Expression<Func<StudentCourse, bool>> expression)
         {
             var studentCourses = await _context.Set<StudentCourse>()
-                .Include(sc => sc.Student)
+            .Include(sc => sc.Student)
+                .ThenInclude(s => s.Faculty)
+            .Include(sc => sc.Student)
                 .ThenInclude(s => s.User)
-                .Include(sc => sc.Course)
-                .Where(expression)
-                .ToListAsync();
+            .Include(sc => sc.Student)
+                .ThenInclude(s => s.Department)
+            .Include(sc => sc.Course)
+            .Where(expression)
+            .ToListAsync();
 
             return studentCourses;
         }

@@ -89,7 +89,7 @@ namespace LocusIDBackend.Services.Implementations
                 return new BaseResponse<AttendanceDto>
                 {
                     Success = false,
-                    Message = "Sorry this Session has ended"
+                    Message = "Sorry this Session has ended or No session has been started for this course yet"
                 };
             }
             var attendanceExists = await _attendanceRepository.Get(a => a.SessionId == session.Id && a.StudentId == student.Id);

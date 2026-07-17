@@ -162,9 +162,75 @@ namespace LocusIDBackend.Services.Implementations
             };
         }
 
-        public async Task<BaseResponse<ICollection<CourseDto>>> EnrollCourse(EnrollCourseRequestModel model)
+        // public async Task<BaseResponse<ICollection<CourseDto>>> EnrollCourse(EnrollCourseRequestModel model)
+        // {
+        //     var userId = _dectoken.GetIdFromRawToken(model.Token);
+        //     if (userId == null)
+        //     {
+        //         return new BaseResponse<ICollection<CourseDto>>
+        //         {
+        //             Success = false,
+        //             Message = "Invalid token",
+        //         };
+        //     }
+
+        //     var student = await _studentRepository.Get(s => s.UserId == userId);
+        //     if (student == null)
+        //     {
+        //         return new BaseResponse<ICollection<CourseDto>> { Success = false, Message = "Student not found" };
+        //     }
+
+        //     var existingCourseIds = student.StudentCourses
+        //     .Select(sc => sc.CourseId.ToString())
+        //     .ToList();
+
+        //     var newCourseIds = model.CourseIds.Except(existingCourseIds).ToList();
+
+        //     if (!newCourseIds.Any())
+        //     {
+        //         return new BaseResponse<ICollection<CourseDto>>
+        //         {
+        //             Success = false,
+        //             Message = "You are already enrolled in all selected courses."
+        //         };
+        //     }
+
+        //     var coursesToAdd = await _courseRepository.GetCoursesByIds(newCourseIds);
+
+        //     foreach (var course in coursesToAdd)
+        //     {
+        //         var studentCourse = new StudentCourse
+        //         {
+        //             StudentId = student.Id,
+        //             CourseId = course.Id,
+        //             Course = course,
+        //             Student = student
+        //         };
+        //         await _studentCourseRepository.Create(studentCourse);
+        //         course.CourseStudents.Add(studentCourse);
+        //         student.StudentCourses.Add(studentCourse);
+        //     }
+
+           
+        //     await _studentRepository.Update(student);
+        //     await _studentRepository.Save();
+        //     var enrolledCourses = student.StudentCourses.Select(sc => new CourseDto
+        //     {
+        //         CourseCode = sc.Course.CourseCode,
+        //         CourseName = sc.Course.CourseName
+        //     }).ToList();
+        //     return new BaseResponse<ICollection<CourseDto>>
+        //     {
+        //         Success = true,
+        //         Message = "Courses enrolled successfully",
+        //         Data = enrolledCourses
+        //     };
+
+        // }
+
+            public async Task<BaseResponse<ICollection<CourseDto>>> EnrollCourse(ICollection<EnrollCourseRequestModel> model, string token)
         {
-            var userId = _dectoken.GetIdFromRawToken(model.Token);
+            var userId = _dectoken.GetIdFromRawToken(token);
             if (userId == null)
             {
                 return new BaseResponse<ICollection<CourseDto>>
@@ -177,28 +243,34 @@ namespace LocusIDBackend.Services.Implementations
             var student = await _studentRepository.Get(s => s.UserId == userId);
             if (student == null)
             {
-                return new BaseResponse<ICollection<CourseDto>> { Success = false, Message = "Student not found" };
-            }
-
-            var existingCourseIds = student.StudentCourses
-            .Select(sc => sc.CourseId.ToString())
-            .ToList();
-
-            var newCourseIds = model.CourseIds.Except(existingCourseIds).ToList();
-
-            if (!newCourseIds.Any())
-            {
-                return new BaseResponse<ICollection<CourseDto>>
-                {
-                    Success = false,
-                    Message = "You are already enrolled in all selected courses."
+                return new BaseResponse<ICollection<CourseDto>> 
+                { 
+                    Success = false, 
+                    Message = "Student not found" 
                 };
             }
 
-            var coursesToAdd = await _courseRepository.GetCoursesByIds(newCourseIds);
+            var existingCourseCodes = student.StudentCourses
+                .Select(sc => sc.Course.CourseCode)
+                .ToList();
 
-            foreach (var course in coursesToAdd)
+            var skippedCourses = new List<string>();
+
+            foreach (var courseModel in model)
             {
+                if (existingCourseCodes.Contains(courseModel.CourseCode))
+                {
+                    skippedCourses.Add(courseModel.CourseCode);
+                    continue;
+                }
+
+                var course = await _courseRepository.Get(c => c.CourseCode == courseModel.CourseCode);
+                if (course == null)
+                {
+                    skippedCourses.Add(courseModel.CourseCode);
+                    continue;
+                }
+
                 var studentCourse = new StudentCourse
                 {
                     StudentId = student.Id,
@@ -206,27 +278,33 @@ namespace LocusIDBackend.Services.Implementations
                     Course = course,
                     Student = student
                 };
+
                 await _studentCourseRepository.Create(studentCourse);
                 course.CourseStudents.Add(studentCourse);
                 student.StudentCourses.Add(studentCourse);
             }
 
-           
             await _studentRepository.Update(student);
             await _studentRepository.Save();
+
             var enrolledCourses = student.StudentCourses.Select(sc => new CourseDto
             {
                 CourseCode = sc.Course.CourseCode,
                 CourseName = sc.Course.CourseName
             }).ToList();
+
+            var message = skippedCourses.Count > 0
+                ? $"Enrolled successfully. Skipped already enrolled Courses: {string.Join(", ", skippedCourses)}"
+                : "Courses enrolled successfully";
+
             return new BaseResponse<ICollection<CourseDto>>
             {
                 Success = true,
-                Message = "Courses enrolled successfully",
+                Message = message,
                 Data = enrolledCourses
             };
-
         }
+
 
         public async Task<BaseResponse<ICollection<CourseDto>>> GetStudentCourses(string token)
         {
