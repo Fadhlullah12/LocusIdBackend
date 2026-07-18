@@ -5,5 +5,6 @@ public class StudentDto
     public string MatricNumber { get; set; } = default!;
     public string Department { get; set; } = default!;
     public string Faculty { get; set; } = default!;
+    public bool Attended { get; set; } = default!;
     public double AttendancePercentage { get; set; }
 }

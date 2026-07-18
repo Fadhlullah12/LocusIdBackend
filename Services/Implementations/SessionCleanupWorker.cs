@@ -19,6 +19,9 @@ public class SessionCleanupWorker : BackgroundService
             var sessionRepository = scope.ServiceProvider.GetRequiredService<ISessionRepository>();
             var attendanceRepository = scope.ServiceProvider.GetRequiredService<IAttendanceRepository>();
             var courseRepository = scope.ServiceProvider.GetRequiredService<ICourseRepository>();
+            var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
+            var studentSessionRepository = scope.ServiceProvider.GetRequiredService<IStudentSessionRepository>();
+
 
             // 1. Identify expired sessions
             // LOGIC FIX: Check against the calculated EndTime or (CreatedAt + Duration)
@@ -51,6 +54,7 @@ public class SessionCleanupWorker : BackgroundService
                     // 5. Create the "Absent" records
                     foreach (var studentId in absentStudentIds)
                     {
+                        var student = await studentRepository.Get(a => a.Id == studentId);
                         var absenceRecord = new Attendance
                         {
                             SessionId = session.Id,
@@ -58,7 +62,18 @@ public class SessionCleanupWorker : BackgroundService
                             Attended = false, 
                             CreatedAt = DateTime.Now,
                         };
+                         var studentSession = new StudentSession
+                        {
+                            StudentId = studentId,
+                            SessionId = session.Id,
+                            Session = session,
+                            Student = student,
+                            Status = true,
+                        };
                         await attendanceRepository.Create(absenceRecord);
+                        student.StudentSessions.Add(studentSession);
+                        session.StudentSessions.Add(studentSession);
+                        await studentSessionRepository.Create(studentSession);
                     }
 
                     // 6. Finalize the session

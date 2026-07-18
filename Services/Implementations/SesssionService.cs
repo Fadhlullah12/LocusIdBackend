@@ -106,6 +106,7 @@ namespace LocusIDBackend.Services.Implementations
                 Id = s.Id,
                 FullName = $"{s.User.FirstName} {s.User.LastName}",                 
                 MatricNumber = s.MatricNumber,
+                Attended = s.Attendances.Any(a => a.SessionId == sessionId && a.Attended)
             }).ToList();
             return new BaseResponse<SessionStudentDto>
             {

@@ -15,8 +15,10 @@ namespace LocusIDBackend.Services.Implementations
         private readonly IGeoService _geoService;
         private readonly IAcademicSessionRepository _academicSessionRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly IStudentSessionRepository _studentSessionRepository; 
         private readonly IDecodeTokenService _decodeTokenService;
-        public AttendanceService(ISessionRepository sessionRepository, IStudentRepository studentRepository, IAttendanceRepository attendanceRepository, IGeoService geoService, IAcademicSessionRepository academicSessionRepository, ICourseRepository courseRepository, IDecodeTokenService decodeTokenService)
+        public AttendanceService(ISessionRepository sessionRepository, IStudentRepository studentRepository, IAttendanceRepository attendanceRepository, IGeoService geoService, IAcademicSessionRepository academicSessionRepository, 
+                                ICourseRepository courseRepository, IDecodeTokenService decodeTokenService, IStudentSessionRepository studentSessionRepository)
         {
             _sessionRepository = sessionRepository;
             _studentRepository = studentRepository;
@@ -25,6 +27,7 @@ namespace LocusIDBackend.Services.Implementations
             _academicSessionRepository = academicSessionRepository;
             _courseRepository = courseRepository;
             _decodeTokenService = decodeTokenService;
+            _studentSessionRepository = studentSessionRepository;
         }
 
         public async Task<BaseResponse<int>> CheckAttendanceEligibility(CheckAttendanceEligibilityRequestModel model)
@@ -118,8 +121,20 @@ namespace LocusIDBackend.Services.Implementations
                 Student = student,
                 Attended = true,
             };
+
+             var studentSession = new StudentSession
+            {
+                StudentId = student.Id,
+                SessionId = session.Id,
+                Session = session,
+                Student = student,
+                Status = true,
+            };
             session.Attendances.Add(attendance);
             student.Attendances.Add(attendance);
+            student.StudentSessions.Add(studentSession);
+            session.StudentSessions.Add(studentSession);
+            await _studentSessionRepository.Create(studentSession);
             await _attendanceRepository.Create(attendance);
             await _sessionRepository.Save();
             return new BaseResponse<AttendanceDto>

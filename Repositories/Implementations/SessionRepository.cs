@@ -14,7 +14,8 @@ namespace LocusIDBackend.Repositories.Implementations
 
         public async Task<Session> Get(Expression<Func<Session, bool>> expression)
         {
-            var session = await _context.Sessions.Include(s => s.Course).FirstOrDefaultAsync(expression);
+            var session = await _context.Sessions.Include(s => s.Course)
+            .FirstOrDefaultAsync(expression);
             return session!;
         }
 

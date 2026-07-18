@@ -24,6 +24,7 @@ namespace LocusIDBackend.Repositories.Implementations
         {
              var student = await _context.Set<Student>()
             .Include(a => a.User)
+            .Include(a => a.Attendances)
             .Where(expression)
             .ToListAsync();
             return student;
