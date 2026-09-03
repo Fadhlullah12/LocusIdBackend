@@ -121,6 +121,29 @@ namespace LocusIDBackend.Services.Implementations
 
         }
 
+        public async Task<BaseResponse<string>> DeleteSession(string sessionId, string token)
+        {
+            var userId = _decodeTokenService.GetIdFromRawToken(token);
+            if (userId == null) return new BaseResponse<string> { Success = false, Message = "Invalid token" };
+
+            var session = await _sessionRepository.Get(s => s.Id == sessionId);
+            if (session == null) return new BaseResponse<string> { Success = false, Message = "Session not found" };
+
+            var lecturer = await _lecturerRepository.Get(l => l.Id == session.LecturerId);
+            if (lecturer == null) return new BaseResponse<string> { Success = false, Message = "Lecturer not found" };
+
+            if (lecturer.UserId != userId)
+            {
+                return new BaseResponse<string> { Success = false, Message = "You are not authorized to delete this session" };
+            }
+
+            var deleted = await _sessionRepository.Delete(session.Id);
+            if (!deleted) return new BaseResponse<string> { Success = false, Message = "Failed to delete session" };
+
+            await _sessionRepository.Save();
+            return new BaseResponse<string> { Success = true, Message = "Session deleted successfully" };
+        }
+
     
     }
 }

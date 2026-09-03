@@ -7,5 +7,6 @@ namespace LocusIDBackend.Services.Interfaces
     public interface IAcademicSessionService
     {
         Task<BaseResponse<AcademicSessionDto>> CreateAcademicSession(CreateAcademicSessionRequestModel request,string token);
+        Task<BaseResponse<string>> DeleteAcademicSession(string academicSessionId, string token);
     }
 }

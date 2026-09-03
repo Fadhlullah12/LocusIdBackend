@@ -11,5 +11,6 @@ namespace LocusIDBackend.Services.Interfaces
         Task<BaseResponse<ICollection<StudentDto>>> GetCourseStudents(string courseId);
         Task<BaseResponse<CourseDto>> CreateCourse(CreateCourseRequestModel model,string token);
         Task<BaseResponse<OverallCourseAttendance>> CourseAttendance(string courseCode,string token);
+        Task<BaseResponse<string>> DeleteCourse(string courseCode, string token);
     }
 }

@@ -8,5 +8,6 @@ namespace LocusIDBackend.Services.Interfaces
     {
         Task<BaseResponse<SessionDto>> CreateSession(CreateSessionRequestModel request, string token);
         Task<BaseResponse<SessionStudentDto>> GetSessionStudents(string sessionId);
+        Task<BaseResponse<string>> DeleteSession(string sessionId, string token);
     }
 }

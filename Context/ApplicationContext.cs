@@ -17,6 +17,8 @@ namespace LocusIDBackend.Context
         public DbSet<Faculty> Faculties { get; set; }
         public DbSet<Lecturer> Lecturers { get; set; }
         public DbSet<Director> Directors { get; set; }
+         public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageReadReceipts> MessageReadReceipts { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<StudentCourse> StudentCourses { get; set; }
@@ -90,6 +92,17 @@ namespace LocusIDBackend.Context
                 .HasOne(ss => ss.Session)
                 .WithMany(s => s.StudentSessions)
                 .HasForeignKey(ss => ss.SessionId);
+
+            // Configure Message - ReadReceipts relationship (one-to-many)
+            modelBuilder.Entity<MessageReadReceipts>()
+                .HasOne(r => r.Message)
+                .WithMany(m => m.ReadReceipts)
+                .HasForeignKey("MessageId");
+
+            modelBuilder.Entity<MessageReadReceipts>()
+                .HasOne(r => r.Student)
+                .WithMany(s => s.MessageReadReceipts)
+                .HasForeignKey(r => r.StudentId);
         }
     }
 }

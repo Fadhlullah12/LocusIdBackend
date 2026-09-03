@@ -19,12 +19,11 @@ namespace LocusIDBackend.Controllers
         {
             string authHeader = Request.Headers["Authorization"];
 
-            // if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-            // {
-            //     return Unauthorized(new { status = "error", message = "No valid token found in header" });
-            // }
-            // string rawToken = authHeader.Substring("Bearer ".Length).Trim();
-             string rawToken = "0";
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            }
+            string rawToken = authHeader.Substring("Bearer ".Length).Trim();
             var response = await _academicSessionService.CreateAcademicSession(request,rawToken);
             if (!response.Success)
             {
@@ -32,5 +31,23 @@ namespace LocusIDBackend.Controllers
             }
             return Ok(response);
         } 
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] string academicSessionId)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            }
+            string rawToken = authHeader.Substring("Bearer ".Length).Trim();
+
+            var response = await _academicSessionService.DeleteAcademicSession(academicSessionId, rawToken);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

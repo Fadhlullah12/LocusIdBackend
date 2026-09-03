@@ -32,7 +32,7 @@ namespace LocusIDBackend.Services.Implementations
                     {
                       return new BaseResponse<LoginResponseDto>
                         {
-                            Message = "Sorry Email does not Exist",
+                            Message = "Sorry Invalid Credentials",
                             Success = false,
                         };
                     }

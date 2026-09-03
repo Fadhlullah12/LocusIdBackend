@@ -15,8 +15,13 @@ namespace LocusIDBackend.Services.Implementations
         private readonly IStudentCourseRepository _studentCourseRepository;
         private readonly IAcademicSessionRepository _academicSessionRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISessionRepository _sessionRepository;
+        private readonly IAttendanceRepository _attendanceRepository;
+        private readonly IStudentSessionRepository _studentSessionRepository;
+
         public CourseService(ICourseRepository courseRepository, IDecodeTokenService decodeTokenService, IUserRepository userRepository,
-                             IStudentCourseRepository studentCourseRepository, IAcademicSessionRepository academicSessionRepository, IStudentRepository studentRepository)
+                             IStudentCourseRepository studentCourseRepository, IAcademicSessionRepository academicSessionRepository, IStudentRepository studentRepository,
+                             ISessionRepository sessionRepository, IAttendanceRepository attendanceRepository, IStudentSessionRepository studentSessionRepository)
         {
             _courseRepository = courseRepository;
             _decodeTokenService = decodeTokenService;
@@ -24,6 +29,9 @@ namespace LocusIDBackend.Services.Implementations
             _studentCourseRepository = studentCourseRepository;
             _academicSessionRepository = academicSessionRepository;
             _studentRepository = studentRepository;
+            _sessionRepository = sessionRepository;
+            _attendanceRepository = attendanceRepository;
+            _studentSessionRepository = studentSessionRepository;
         }
 
         public async Task<BaseResponse<CourseDto>> CreateCourse(CreateCourseRequestModel model,string token)
@@ -215,6 +223,90 @@ namespace LocusIDBackend.Services.Implementations
                 Message = "Courses retrieved successfully",
                 Data = courseDtos
             };
+        }
+
+        public async Task<BaseResponse<string>> DeleteCourse(string courseCode, string token)
+        {
+            var accademicSession = await _academicSessionRepository.GetAcademicSession(s => s.IsActive);
+            if(accademicSession == null)
+            {
+                return new BaseResponse<string>
+                {
+                    Success = false,
+                    Message = "No active academic session found"
+                };
+            }
+
+            if( DateTime.UtcNow.Month - accademicSession.StartDate.Month > 1)
+            {
+                return new BaseResponse<string>
+                {
+                    Success = false,
+                    Message = "Cannot delete course"
+                };
+            }
+            var userId = _decodeTokenService.GetIdFromRawToken(token);
+            if (userId == null)
+            {
+                return new BaseResponse<string>
+                {
+                    Success = false,
+                    Message = "Invalid token"
+                };
+            }
+
+            var user = await _userRepository.Get(u => u.Id == userId);
+            if (user == null)
+            {
+                return new BaseResponse<string> { Success = false, Message = "User not found" };
+            }
+
+            var course = await _courseRepository.Get(c => c.CourseCode == courseCode);
+            if (course == null)
+            {
+                return new BaseResponse<string> { Success = false, Message = "Course not found" };
+            }
+
+            if (user.Role != "Director")
+            {
+                if (user.Lecturer == null || user.Lecturer.Id != course.LecturerId)
+                {
+                    return new BaseResponse<string> { Success = false, Message = "You are not authorized to delete this course" };
+                }
+            }
+
+            // Remove enrollments
+            if (course.CourseStudents != null && course.CourseStudents.Any())
+            {
+                _studentCourseRepository.DeleteRange(course.CourseStudents);
+            }
+
+            // Remove sessions and related attendance/student-session records
+            if (course.Sessions != null && course.Sessions.Any())
+            {
+                foreach (var session in course.Sessions.ToList())
+                {
+                    if (session.Attendances != null && session.Attendances.Any())
+                    {
+                        _attendanceRepository.DeleteRange(session.Attendances);
+                    }
+                    if (session.StudentSessions != null && session.StudentSessions.Any())
+                    {
+                        _studentSessionRepository.DeleteRange(session.StudentSessions);
+                    }
+                    await _sessionRepository.Delete(session.Id);
+                }
+            }
+
+            var deleted = await _courseRepository.Delete(course.Id);
+            if (!deleted)
+            {
+                return new BaseResponse<string> { Success = false, Message = "Failed to delete course" };
+            }
+
+            await _courseRepository.Save();
+
+            return new BaseResponse<string> { Success = true, Message = "Course deleted successfully" };
         }
     }
 }

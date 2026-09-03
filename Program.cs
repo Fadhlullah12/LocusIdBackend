@@ -54,6 +54,9 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IAcademicSessionService, AcademicSessionService>();
 // Session Checker Background Worker
 builder.Services.AddHostedService<SessionCleanupWorker>();
+// Message repositories & services
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 // Registering JWT Settings
 var jwtSettings = new JwtSettings();
 builder.Configuration.GetSection("Jwt").Bind(jwtSettings);
@@ -90,7 +93,12 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+// SignalR
+builder.Services.AddSignalR();
 var app = builder.Build();
+
+// Map SignalR hubs
+app.MapHub<LocusIDBackend.Hubs.MessageHub>("/hubs/messages");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

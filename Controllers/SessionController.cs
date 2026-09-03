@@ -32,5 +32,19 @@ namespace LocusIDBackend.Controllers
             var result = await _sessionService.GetSessionStudents(sessionId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] string sessionId)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            }
+            string rawToken = authHeader.Substring("Bearer ".Length).Trim();
+
+            var result = await _sessionService.DeleteSession(sessionId, rawToken);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace LocusIDBackend.Models.Entities
         public Faculty Faculty { get; set; } = default!;
         public ICollection<Session>? Sessions { get; set; } = new HashSet<Session>();
         public ICollection<Course> Courses { get; set; } = new HashSet<Course>();
+         public ICollection<Message>? Messages { get; set; } = new HashSet<Message>();
     }
 }

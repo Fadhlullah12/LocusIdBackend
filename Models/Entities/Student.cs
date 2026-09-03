@@ -14,5 +14,6 @@ namespace LocusIDBackend.Models.Entities
         public ICollection<Attendance>? Attendances { get; set;} = new HashSet<Attendance>();
         public ICollection<StudentCourse>? StudentCourses { get; set;} = new HashSet<StudentCourse>();
         public ICollection<StudentSession>? StudentSessions { get; set;} = new HashSet<StudentSession>();
+        public ICollection<MessageReadReceipts>? MessageReadReceipts { get; set; } = new HashSet<MessageReadReceipts>();
     }
 }

@@ -80,5 +80,24 @@ namespace LocusIDBackend.Controllers
             }
             return Ok(response);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] string courseCode)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { status = "error", message = "No valid token found in header" });
+            }
+            string rawToken = authHeader.Substring("Bearer ".Length).Trim();
+
+            var response = await _courseService.DeleteCourse(courseCode, rawToken);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

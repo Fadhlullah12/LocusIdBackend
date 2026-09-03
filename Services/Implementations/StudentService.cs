@@ -18,8 +18,12 @@ namespace LocusIDBackend.Services.Implementations
         private readonly IStudentCourseRepository _studentCourseRepository;
         private readonly ISchoolRepository _schoolRepository;
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly IAttendanceRepository _attendanceRepository;
+        private readonly IStudentSessionRepository _studentSessionRepository;
+        private readonly IMessageRepository _messageRepository;
         public StudentService(IStudentRepository studentRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService,
-         ICourseRepository courseRepository, IFacultyRepository facultyRepository, IStudentCourseRepository studentCourseRepository, ISchoolRepository schoolRepository, IDepartmentRepository departmentRepository)
+         ICourseRepository courseRepository, IFacultyRepository facultyRepository, IStudentCourseRepository studentCourseRepository, ISchoolRepository schoolRepository, IDepartmentRepository departmentRepository,
+         IAttendanceRepository attendanceRepository, IStudentSessionRepository studentSessionRepository, IMessageRepository messageRepository)
         {
             _studentRepository = studentRepository;
             _userRepository = userRepository;
@@ -29,6 +33,9 @@ namespace LocusIDBackend.Services.Implementations
             _studentCourseRepository = studentCourseRepository;
             _schoolRepository = schoolRepository;
             _departmentRepository = departmentRepository;
+            _attendanceRepository = attendanceRepository;
+            _studentSessionRepository = studentSessionRepository;
+            _messageRepository = messageRepository;
         }
 
         public async Task<BaseResponse<StudentDto>> CreateStudent(CreateStudentRequestModel request)
@@ -121,6 +128,56 @@ namespace LocusIDBackend.Services.Implementations
                 }
             };
 
+        }
+
+        public async Task<BaseResponse<string>> DeleteStudent(string studentId, string token)
+        {
+            var userId = _dectoken.GetIdFromRawToken(token);
+            if (userId == null)
+            {
+                return new BaseResponse<string> { Success = false, Message = "Invalid token" };
+            }
+
+            var user = await _userRepository.Get(u => u.Id == userId);
+            if (user == null)
+            {
+                return new BaseResponse<string> { Success = false, Message = "User not found" };
+            }
+
+            var student = await _studentRepository.GetId(studentId);
+            if (student == null)
+            {
+                return new BaseResponse<string> { Success = false, Message = "Student not found" };
+            }
+
+            // Allow director or the student themself
+            if (user.Role != "Director" && student.UserId != user.Id)
+            {
+                return new BaseResponse<string> { Success = false, Message = "You are not authorized to delete this student" };
+            }
+
+            if (student.StudentCourses != null && student.StudentCourses.Any())
+            {
+                _studentCourseRepository.DeleteRange(student.StudentCourses);
+            }
+
+            if (student.Attendances != null && student.Attendances.Any())
+            {
+                _attendanceRepository.DeleteRange(student.Attendances);
+            }
+
+            if (student.StudentSessions != null && student.StudentSessions.Any())
+            {
+                _studentSessionRepository.DeleteRange(student.StudentSessions);
+            }
+
+            // delete student and their user
+            await _studentRepository.Delete(student.Id);
+            await _userRepository.Delete(student.UserId);
+
+            await _studentRepository.Save();
+
+            return new BaseResponse<string> { Success = true, Message = "Student deleted successfully" };
         }
 
         public async Task<BaseResponse<string>> DropCourses(ICollection<string> courseIds, string token)
