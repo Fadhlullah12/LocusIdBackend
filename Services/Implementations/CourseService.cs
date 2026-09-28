@@ -36,6 +36,24 @@ namespace LocusIDBackend.Services.Implementations
 
         public async Task<BaseResponse<CourseDto>> CreateCourse(CreateCourseRequestModel model,string token)
         {
+             var accademicSession = await _academicSessionRepository.GetAcademicSession(s => s.IsActive);
+            if(accademicSession == null)
+            {
+                return new BaseResponse<CourseDto>
+                {
+                    Success = false,
+                    Message = "No active academic session found"
+                };
+            }
+
+            if( DateTime.UtcNow.Month - accademicSession.StartDate.Month > 1)
+            {
+                return new BaseResponse<CourseDto>
+                {
+                    Success = false,
+                    Message = "Cannot delete course"
+                };
+            }
             var existingCourse = await _courseRepository.Get(c => c.CourseCode == model.CourseCode);
             string userId = _decodeTokenService.GetIdFromRawToken(token);
             if(userId == null)
@@ -48,8 +66,8 @@ namespace LocusIDBackend.Services.Implementations
             }
             var user = await _userRepository.Get(u => u.Id == userId);
             if (existingCourse != null)
-            {
-               BaseResponse<CourseDto> response = new BaseResponse<CourseDto>
+                {
+                BaseResponse<CourseDto> response = new BaseResponse<CourseDto>
                 {
                     Success = false,
                     Message = "Course already exists"
@@ -133,7 +151,7 @@ namespace LocusIDBackend.Services.Implementations
                     TimeMarked = a.CreatedAt.ToString("HH:mm:ss"),
                 }).ToList(),
             };
-                int attendanceCount = course.Sessions.Count - courseAttendanceDtos.Attendances.Count;
+                int attendanceCount = courseAttendanceDtos.Attendances.Where(a => a.Status).Count();
                 courseAttendanceDtos.AttendedClasses = attendanceCount;
            
             return new BaseResponse<OverallCourseAttendance>

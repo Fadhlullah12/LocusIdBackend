@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.git/
+**/TestResults/
+.docker-publish-check/
+appsettings*.json
+*.user
+*.suo
+Dockerfile*
+docker-compose*.yml

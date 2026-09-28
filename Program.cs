@@ -5,6 +5,7 @@ using LocusIDBackend.Repositories.Implementations;
 using LocusIDBackend.Repositories.Interfaces;
 using LocusIDBackend.Services.Implementations;
 using LocusIDBackend.Services.Interfaces;
+using LocusIDBackend.Services.SignalRHub;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,7 +21,8 @@ builder.Services.AddOpenApi(); // This uses the stable .NET 10 generator
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("ConnectionString"), 
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ConnectionString"))));
-
+// SignalR
+builder.Services.AddSignalR();
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -98,7 +100,7 @@ builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Map SignalR hubs
-app.MapHub<LocusIDBackend.Hubs.MessageHub>("/hubs/messages");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
