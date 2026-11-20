@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocusIDBackend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260619222202_Initial DataBase")]
-    partial class InitialDataBase
+    [Migration("20261119225727_Add Director")]
+    partial class AddDirector
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,16 +46,10 @@ namespace LocusIDBackend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("SchoolId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SchoolId");
 
                     b.ToTable("AcademicSessions");
                 });
@@ -200,6 +194,16 @@ namespace LocusIDBackend.Migrations
                         .IsUnique();
 
                     b.ToTable("Directors");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "5ca29ae5-9bba-4c20-adc5-b38bb72572b9",
+                            CreatedAt = new DateTime(2026, 11, 19, 22, 57, 25, 584, DateTimeKind.Utc).AddTicks(1110),
+                            IsDeleted = false,
+                            StaffId = "DIR001",
+                            UserId = "9624ee9b-771e-400f-bf31-1fae4c5aee2c"
+                        });
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Faculty", b =>
@@ -217,13 +221,7 @@ namespace LocusIDBackend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("SchoolId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("SchoolId");
 
                     b.ToTable("Faculties");
                 });
@@ -247,10 +245,6 @@ namespace LocusIDBackend.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("SchoolId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("StaffId")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -264,8 +258,6 @@ namespace LocusIDBackend.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("FacultyId");
-
-                    b.HasIndex("SchoolId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -301,7 +293,39 @@ namespace LocusIDBackend.Migrations
                     b.ToTable("LecturerCourses");
                 });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.School", b =>
+            modelBuilder.Entity("LocusIDBackend.Models.Entities.Message", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CourseId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("LecturerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LecturerId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("LocusIDBackend.Models.Entities.MessageReadReceipts", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
@@ -309,23 +333,27 @@ namespace LocusIDBackend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DirectorId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("MessageId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DirectorId")
-                        .IsUnique();
+                    b.HasIndex("MessageId");
 
-                    b.ToTable("Schools");
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("MessageReadReceipts");
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Session", b =>
@@ -400,10 +428,6 @@ namespace LocusIDBackend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("SchoolId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -413,8 +437,6 @@ namespace LocusIDBackend.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("FacultyId");
-
-                    b.HasIndex("SchoolId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -518,17 +540,19 @@ namespace LocusIDBackend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.AcademicSession", b =>
-                {
-                    b.HasOne("LocusIDBackend.Models.Entities.School", "School")
-                        .WithMany("AcademicSessions")
-                        .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("School");
+                    b.HasData(
+                        new
+                        {
+                            Id = "9624ee9b-771e-400f-bf31-1fae4c5aee2c",
+                            CreatedAt = new DateTime(2026, 11, 19, 23, 57, 25, 581, DateTimeKind.Local).AddTicks(7116),
+                            Email = "director@unilorin.edu.ng",
+                            FirstName = "Balogun",
+                            IsDeleted = false,
+                            LastName = "Fadhlullah",
+                            Password = "$2a$11$8Sw1ZfhzMCw0oOoI4WD0y.TCXPCsNRO5.K6UEs05B4DPd6/hWFBNK",
+                            Role = "Director"
+                        });
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Attendance", b =>
@@ -602,17 +626,6 @@ namespace LocusIDBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.Faculty", b =>
-                {
-                    b.HasOne("LocusIDBackend.Models.Entities.School", "School")
-                        .WithMany("Faculties")
-                        .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("School");
-                });
-
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Lecturer", b =>
                 {
                     b.HasOne("LocusIDBackend.Models.Entities.Department", "Department")
@@ -627,12 +640,6 @@ namespace LocusIDBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LocusIDBackend.Models.Entities.School", "School")
-                        .WithMany("Lecturers")
-                        .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("LocusIDBackend.Models.Entities.User", "User")
                         .WithOne("Lecturer")
                         .HasForeignKey("LocusIDBackend.Models.Entities.Lecturer", "UserId")
@@ -642,8 +649,6 @@ namespace LocusIDBackend.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Faculty");
-
-                    b.Navigation("School");
 
                     b.Navigation("User");
                 });
@@ -667,15 +672,42 @@ namespace LocusIDBackend.Migrations
                     b.Navigation("Lecturer");
                 });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.School", b =>
+            modelBuilder.Entity("LocusIDBackend.Models.Entities.Message", b =>
                 {
-                    b.HasOne("LocusIDBackend.Models.Entities.Director", "Director")
-                        .WithOne("School")
-                        .HasForeignKey("LocusIDBackend.Models.Entities.School", "DirectorId")
+                    b.HasOne("LocusIDBackend.Models.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Director");
+                    b.HasOne("LocusIDBackend.Models.Entities.Lecturer", "Lecturer")
+                        .WithMany("Messages")
+                        .HasForeignKey("LecturerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Lecturer");
+                });
+
+            modelBuilder.Entity("LocusIDBackend.Models.Entities.MessageReadReceipts", b =>
+                {
+                    b.HasOne("LocusIDBackend.Models.Entities.Message", "Message")
+                        .WithMany("ReadReceipts")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LocusIDBackend.Models.Entities.Student", "Student")
+                        .WithMany("MessageReadReceipts")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Session", b =>
@@ -719,12 +751,6 @@ namespace LocusIDBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LocusIDBackend.Models.Entities.School", "School")
-                        .WithMany("Students")
-                        .HasForeignKey("SchoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("LocusIDBackend.Models.Entities.User", "User")
                         .WithOne("Student")
                         .HasForeignKey("LocusIDBackend.Models.Entities.Student", "UserId")
@@ -734,8 +760,6 @@ namespace LocusIDBackend.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Faculty");
-
-                    b.Navigation("School");
 
                     b.Navigation("User");
                 });
@@ -801,12 +825,6 @@ namespace LocusIDBackend.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.Director", b =>
-                {
-                    b.Navigation("School")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Faculty", b =>
                 {
                     b.Navigation("Departments");
@@ -820,18 +838,14 @@ namespace LocusIDBackend.Migrations
                 {
                     b.Navigation("Courses");
 
+                    b.Navigation("Messages");
+
                     b.Navigation("Sessions");
                 });
 
-            modelBuilder.Entity("LocusIDBackend.Models.Entities.School", b =>
+            modelBuilder.Entity("LocusIDBackend.Models.Entities.Message", b =>
                 {
-                    b.Navigation("AcademicSessions");
-
-                    b.Navigation("Faculties");
-
-                    b.Navigation("Lecturers");
-
-                    b.Navigation("Students");
+                    b.Navigation("ReadReceipts");
                 });
 
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Session", b =>
@@ -844,6 +858,8 @@ namespace LocusIDBackend.Migrations
             modelBuilder.Entity("LocusIDBackend.Models.Entities.Student", b =>
                 {
                     b.Navigation("Attendances");
+
+                    b.Navigation("MessageReadReceipts");
 
                     b.Navigation("StudentCourses");
 

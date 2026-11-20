@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LocusIDBackend.Models.Entities;
+using BCrypt.Net;
 
 namespace LocusIDBackend.Context
 {
@@ -10,7 +11,6 @@ namespace LocusIDBackend.Context
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<School> Schools { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Session> Sessions { get; set; }
@@ -29,6 +29,26 @@ namespace LocusIDBackend.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var directorId = Guid.NewGuid();
+            var directorUserId = Guid.NewGuid();
+            modelBuilder.Entity<User>().HasData(new User
+            {
+                Id = directorUserId.ToString(),
+                FirstName = "Balogun",
+                LastName = "Fadhlullah",
+                Email = "director@unilorin.edu.ng",
+                Password = BCrypt.Net.BCrypt.HashPassword("director123"),
+                Role = "Director",
+                CreatedAt = DateTime.Now,
+                 
+            });
+
+            modelBuilder.Entity<Director>().HasData(new Director
+            {
+                UserId = directorUserId.ToString(),
+                StaffId = "DIR001",
+                Id = directorId.ToString(),
+            });
             base.OnModelCreating(modelBuilder);
 
             // Configure Student-User relationship (one-to-one)
@@ -43,6 +63,13 @@ namespace LocusIDBackend.Context
                 .HasOne(u => u.User)
                 .WithOne(l => l.Lecturer)
                 .HasForeignKey<Lecturer>("UserId")
+                .IsRequired(true);
+
+            // Configure Director-User relationship (one-to-one)
+            modelBuilder.Entity<Director>()
+                .HasOne(d => d.User)
+                .WithOne(u => u.Director)
+                .HasForeignKey<Director>(d => d.UserId)
                 .IsRequired(true);
 
             // Configure Student-Attendance relationship (one-to-many)

@@ -12,17 +12,15 @@ namespace LocusIDBackend.Repositories.Implementations
         public DirectorRepository(ApplicationContext context) : base(context) { }
         public async Task<Director> Get(string id)
         {
-            var director = await _context.Directors.
-            Include(d => d.School).
-            FirstOrDefaultAsync(d => d.Id == id);
+            var director = await _context.Directors
+            .FirstOrDefaultAsync(d => d.Id == id);
             return director!;
         }
 
         public async Task<Director> Get(Expression<Func<Director, bool>> expression)
         {
-            var director = await _context.Directors.
-            Include(a => a.School).
-            FirstOrDefaultAsync(expression);
+            var director = await _context.Directors
+            .FirstOrDefaultAsync(expression);
             return director!;
         }
 

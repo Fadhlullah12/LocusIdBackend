@@ -25,9 +25,9 @@ namespace LocusIDBackend.Controllers
             return Ok(response);
         }
         [HttpGet]
-        public async Task<IActionResult> GetFaculties(string schoolName)
+        public async Task<IActionResult> GetFaculties()
         {
-            var response = await _facultyService.GetFaculties(schoolName);
+            var response = await _facultyService.GetFaculties();
             if (!response.Success)
             {
                 return BadRequest(response);

@@ -16,13 +16,11 @@ namespace LocusIDBackend.Services.Implementations
         private readonly ICourseRepository _courseRepository;
         private readonly IFacultyRepository _facultyRepository;
         private readonly IStudentCourseRepository _studentCourseRepository;
-        private readonly ISchoolRepository _schoolRepository;
-        private readonly IDepartmentRepository _departmentRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IStudentSessionRepository _studentSessionRepository;
         private readonly IMessageRepository _messageRepository;
         public StudentService(IStudentRepository studentRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService,
-         ICourseRepository courseRepository, IFacultyRepository facultyRepository, IStudentCourseRepository studentCourseRepository, ISchoolRepository schoolRepository, IDepartmentRepository departmentRepository,
+         ICourseRepository courseRepository, IFacultyRepository facultyRepository, IStudentCourseRepository studentCourseRepository,
          IAttendanceRepository attendanceRepository, IStudentSessionRepository studentSessionRepository, IMessageRepository messageRepository)
         {
             _studentRepository = studentRepository;
@@ -31,8 +29,6 @@ namespace LocusIDBackend.Services.Implementations
             _courseRepository = courseRepository;
             _facultyRepository = facultyRepository;
             _studentCourseRepository = studentCourseRepository;
-            _schoolRepository = schoolRepository;
-            _departmentRepository = departmentRepository;
             _attendanceRepository = attendanceRepository;
             _studentSessionRepository = studentSessionRepository;
             _messageRepository = messageRepository;
@@ -42,23 +38,22 @@ namespace LocusIDBackend.Services.Implementations
         {
             var existingstudent = await _studentRepository.Get(s => s.MatricNumber == request.MatricNumber);
             var existingUser = await _userRepository.Get(s => s.Email == request.Email);
-            var school = await _schoolRepository.Get(s => s.Name == request.SchoolName);
-            var department = await _departmentRepository.Get(d => d.Name == request.Department);
             var faculty = await _facultyRepository.Get(f => f.Name == request.Faculty);
-             if(department == null)
-            {
-                return new BaseResponse<StudentDto>
-                {
-                    Success = false,
-                    Message = "Department not found"
-                };
-            }
              if (faculty == null)
             {
                 return new BaseResponse<StudentDto>
                 {
                     Success = false,
                     Message = "Faculty not found"
+                };
+            }
+            var department = faculty.Departments.FirstOrDefault(d => d.Name == request.Department);
+            if (department == null)
+            {
+                return new BaseResponse<StudentDto>
+                {
+                    Success = false,
+                    Message = "Department not found"
                 };
             }
             
@@ -78,14 +73,6 @@ namespace LocusIDBackend.Services.Implementations
                     Message = "Student with the same matric number already exists"
                 };
             }
-            if (school == null)
-            {
-                return new BaseResponse<StudentDto>
-                {
-                    Success = false,
-                    Message = "School not found"
-                };
-            }
             var student = new Student
             {
                 Id = Guid.NewGuid().ToString(),
@@ -94,8 +81,6 @@ namespace LocusIDBackend.Services.Implementations
                 DepartmentId = department.Id,
                 Faculty = faculty,
                 FacultyId = faculty.Id,
-                School = school,
-                SchoolId = school.Id,
             };
             var user = new User
             {
@@ -108,7 +93,6 @@ namespace LocusIDBackend.Services.Implementations
                 Email = request.Email,
             };
             faculty.Students.Add(student);
-            school.Students.Add(student);
             student.User = user;
             student.UserId = user.Id;
             await _studentRepository.Create(student);

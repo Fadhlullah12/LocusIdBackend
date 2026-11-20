@@ -12,14 +12,12 @@ namespace LocusIDBackend.Services.Implementations
         private readonly ILecturerRepository _lecturerRepository;
         private readonly IUserRepository _userRepository;
         private readonly IDecodeTokenService _decodeTokenService;
-        private readonly ISchoolRepository _schoolRepository;
         private readonly IFacultyRepository _facultyRepository;
-        public LecturerService(ILecturerRepository lecturerRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService, ISchoolRepository schoolRepository, IFacultyRepository facultyRepository)
+        public LecturerService(ILecturerRepository lecturerRepository, IUserRepository userRepository, IDecodeTokenService decodeTokenService, IFacultyRepository facultyRepository)
         {
             _lecturerRepository = lecturerRepository;
             _userRepository = userRepository;
             _decodeTokenService = decodeTokenService;
-            _schoolRepository = schoolRepository;
             _facultyRepository = facultyRepository;
         }
 
@@ -27,17 +25,7 @@ namespace LocusIDBackend.Services.Implementations
         {
             var existinglecturer = await _lecturerRepository.Get(l => l.StaffId == request.LecturerId);
             var existingUser = await _userRepository.Get(s => s.Email == request.Email);
-            var school = await _schoolRepository.Get(s => s.Name == request.SchoolName);
-            var department = school.Faculties.SelectMany(f => f.Departments).FirstOrDefault(d => d.Name == request.Department);
             var faculty = await _facultyRepository.Get(f => f.Name == request.Faculty);
-             if (school == null)
-            {
-                return new BaseResponse<CreateLecturerResponseDto>
-                {
-                    Success = false,
-                    Message = "School not found"
-                };
-            }
             if (faculty == null)
             {
                 return new BaseResponse<CreateLecturerResponseDto>
@@ -46,6 +34,7 @@ namespace LocusIDBackend.Services.Implementations
                     Message = "Faculty not found"
                 };
             }
+            var department = faculty.Departments.FirstOrDefault(d => d.Name == request.Department);
             if (department == null)
             {
                 return new BaseResponse<CreateLecturerResponseDto>
@@ -83,8 +72,6 @@ namespace LocusIDBackend.Services.Implementations
                 StaffId = request.LecturerId,
                 User = user,
                 UserId = user.Id,
-                School = school,
-                SchoolId = school.Id,
                 DepartmentId = department.Id,
                 Department = department,
                 FacultyId = faculty.Id,

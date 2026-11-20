@@ -11,20 +11,15 @@ namespace LocusIDBackend.Services.Implementations
     {
         private readonly IDecodeTokenService _decodeTokenService;   
         private readonly IFacultyRepository _facultyRepository;
-        private readonly IDirectorRepository _directorRepository;
-        public FacultyService(IDecodeTokenService decodeTokenService, IFacultyRepository facultyRepository,IDirectorRepository directorRepository)
+        public FacultyService(IDecodeTokenService decodeTokenService, IFacultyRepository facultyRepository)
         {
             _decodeTokenService = decodeTokenService;
             _facultyRepository = facultyRepository;
-            _directorRepository = directorRepository;
         }
 
         public async Task<BaseResponse<FacultyDto>> CreateFaculty(CreateFacultyRequestModel request, string token)
         {
-            var userID ="6eebd807-8efc-47be-a744-adc9c23038ae";
-            var director = await  _directorRepository.Get(u => u.UserId == userID);
-            var school = director.School;
-            var existingFaculty = await _facultyRepository.Get(c => c.Name == request.Name && c.SchoolId == director.School.Id);
+            var existingFaculty = await _facultyRepository.Get(c => c.Name == request.Name);
             if(existingFaculty != null)
             {
                 return new BaseResponse<FacultyDto>
@@ -35,11 +30,8 @@ namespace LocusIDBackend.Services.Implementations
             }
              var faculty = new Faculty
              {
-                 Name = request.Name,
-                 School = director.School,
-                 SchoolId = director.School.Id
+                 Name = request.Name
              };
-             school.Faculties.Add(faculty);
              await _facultyRepository.Create(faculty);
              await _facultyRepository.Save();
              return new BaseResponse<FacultyDto>
@@ -53,9 +45,9 @@ namespace LocusIDBackend.Services.Implementations
              };
         }
 
-        public async Task<BaseResponse<ICollection<FacultyDto>>> GetFaculties(string schoolName)
+        public async Task<BaseResponse<ICollection<FacultyDto>>> GetFaculties()
         {
-            var faculties = await _facultyRepository.GetFaculties(c => c.School.Name == schoolName);
+            var faculties = await _facultyRepository.GetFaculties(_ => true);
             var facultyDtos = faculties.Select(a => new FacultyDto
             {
               Name = a.Name,

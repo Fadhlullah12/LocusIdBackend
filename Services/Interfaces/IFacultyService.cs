@@ -7,6 +7,6 @@ namespace LocusIDBackend.Services.Interfaces
     public interface IFacultyService
     {
         Task<BaseResponse<FacultyDto>> CreateFaculty(CreateFacultyRequestModel request, string token);
-        Task<BaseResponse<ICollection<FacultyDto>>> GetFaculties(string schoolName);
+        Task<BaseResponse<ICollection<FacultyDto>>> GetFaculties();
     }
 }

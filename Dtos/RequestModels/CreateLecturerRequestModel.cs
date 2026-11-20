@@ -7,7 +7,6 @@ namespace LocusIDBackend.Dtos.RequestModels
         public string Email { get; set; } = default!;
         public string Password { get; set; } = default!;
         public string LecturerId { get; set; } = default!;
-        public string SchoolName { get; set; } = default!;
         public string Department { get; set; } = default!;
         public string Faculty { get; set; } = default!;
         // public IFormFile? PhotoUrl { get; set; }

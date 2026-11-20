@@ -6,12 +6,49 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LocusIDBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDataBase : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AcademicSessions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AcademicSessions", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Faculties",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Faculties", x => x.Id);
+                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -42,109 +79,6 @@ namespace LocusIDBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Directors",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    StaffId = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Directors", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Directors_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Schools",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DirectorId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Schools", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Schools_Directors_DirectorId",
-                        column: x => x.DirectorId,
-                        principalTable: "Directors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "AcademicSessions",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    SchoolId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AcademicSessions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AcademicSessions_Schools_SchoolId",
-                        column: x => x.SchoolId,
-                        principalTable: "Schools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Faculties",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SchoolId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Faculties", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Faculties_Schools_SchoolId",
-                        column: x => x.SchoolId,
-                        principalTable: "Schools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "Departments",
                 columns: table => new
                 {
@@ -170,6 +104,31 @@ namespace LocusIDBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Directors",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StaffId = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Directors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Directors_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Lecturers",
                 columns: table => new
                 {
@@ -180,8 +139,6 @@ namespace LocusIDBackend.Migrations
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DepartmentId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SchoolId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     FacultyId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -201,12 +158,6 @@ namespace LocusIDBackend.Migrations
                         name: "FK_Lecturers_Faculties_FacultyId",
                         column: x => x.FacultyId,
                         principalTable: "Faculties",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Lecturers_Schools_SchoolId",
-                        column: x => x.SchoolId,
-                        principalTable: "Schools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -232,8 +183,6 @@ namespace LocusIDBackend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DepartmentId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SchoolId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -250,12 +199,6 @@ namespace LocusIDBackend.Migrations
                         name: "FK_Students_Faculties_FacultyId",
                         column: x => x.FacultyId,
                         principalTable: "Faculties",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Students_Schools_SchoolId",
-                        column: x => x.SchoolId,
-                        principalTable: "Schools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -357,6 +300,39 @@ namespace LocusIDBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LecturerId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CourseId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Content = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Lecturers_LecturerId",
+                        column: x => x.LecturerId,
+                        principalTable: "Lecturers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Sessions",
                 columns: table => new
                 {
@@ -432,6 +408,38 @@ namespace LocusIDBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "MessageReadReceipts",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MessageId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StudentId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ReadAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MessageReadReceipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MessageReadReceipts_Messages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "Messages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MessageReadReceipts_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Attendances",
                 columns: table => new
                 {
@@ -496,11 +504,6 @@ namespace LocusIDBackend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AcademicSessions_SchoolId",
-                table: "AcademicSessions",
-                column: "SchoolId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Attendances_SessionId",
                 table: "Attendances",
                 column: "SessionId");
@@ -537,11 +540,6 @@ namespace LocusIDBackend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Faculties_SchoolId",
-                table: "Faculties",
-                column: "SchoolId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_LecturerCourses_CourseId",
                 table: "LecturerCourses",
                 column: "CourseId");
@@ -562,21 +560,30 @@ namespace LocusIDBackend.Migrations
                 column: "FacultyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lecturers_SchoolId",
-                table: "Lecturers",
-                column: "SchoolId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Lecturers_UserId",
                 table: "Lecturers",
                 column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Schools_DirectorId",
-                table: "Schools",
-                column: "DirectorId",
-                unique: true);
+                name: "IX_MessageReadReceipts_MessageId",
+                table: "MessageReadReceipts",
+                column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageReadReceipts_StudentId",
+                table: "MessageReadReceipts",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_CourseId",
+                table: "Messages",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_LecturerId",
+                table: "Messages",
+                column: "LecturerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sessions_AcademicSessionId",
@@ -614,11 +621,6 @@ namespace LocusIDBackend.Migrations
                 column: "FacultyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_SchoolId",
-                table: "Students",
-                column: "SchoolId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Students_UserId",
                 table: "Students",
                 column: "UserId",
@@ -645,13 +647,22 @@ namespace LocusIDBackend.Migrations
                 name: "DepartmentCourses");
 
             migrationBuilder.DropTable(
+                name: "Directors");
+
+            migrationBuilder.DropTable(
                 name: "LecturerCourses");
+
+            migrationBuilder.DropTable(
+                name: "MessageReadReceipts");
 
             migrationBuilder.DropTable(
                 name: "StudentCourses");
 
             migrationBuilder.DropTable(
                 name: "StudentSessions");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Sessions");
@@ -672,16 +683,10 @@ namespace LocusIDBackend.Migrations
                 name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "Faculties");
-
-            migrationBuilder.DropTable(
-                name: "Schools");
-
-            migrationBuilder.DropTable(
-                name: "Directors");
-
-            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Faculties");
         }
     }
 }

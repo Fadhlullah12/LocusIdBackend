@@ -27,15 +27,15 @@ namespace LocusIDBackend.Services.Implementations
             var userId = "6eebd807-8efc-47be-a744-adc9c23038ae";
             var director = await _directorRepository.Get(a => a.UserId == userId);
             var faculty = await _facultyRepository.Get(a => a.Id == request.FacultyId);
-            var existingDepartment = await _departmentRepository.Get(a => a.Name == request.Name && a.Faculty.SchoolId == director.School.Id);
-            if (director == null)
-            {
-                return new BaseResponse<DepartmentDto>()
-                {
-                    Success = false,
-                    Message = "Director not found",
-                };
-            }
+            var existingDepartment = await _departmentRepository.Get(a => a.Name == request.Name && a.FacultyId == request.FacultyId);
+            // if (director == null)
+            // {
+            //     return new BaseResponse<DepartmentDto>()
+            //     {
+            //         Success = false,
+            //         Message = "Director not found",
+            //     };
+            // }
             if (existingDepartment != null)
             {
                 return new BaseResponse<DepartmentDto>()
